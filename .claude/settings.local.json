@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip:*)",
+      "Bash(python3:*)",
+      "Bash(done)",
+      "Bash(xxd:*)",
+      "Bash(brew list:*)",
+      "Bash(ls:*)",
+      "Bash(tail:*)",
+      "Bash(java:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(head:*)",
+      "Bash(R2_LIBR_PLUGINS=/tmp/r2/payload_extract/usr/local/lib/radare2/6.1.0 /tmp/r2/payload_extract/usr/local/bin/r2:*)",
+      "Bash(DYLD_LIBRARY_PATH=/tmp/r2/payload_extract/usr/local/lib /tmp/r2/payload_extract/usr/local/bin/r2:*)",
+      "Bash(cat:*)",
+      "Bash(/tmp/r2/r2:*)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+*.dic
+*.dic.zip
+__pycache__/
+*.pyc
+.DS_Store
