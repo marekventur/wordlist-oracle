@@ -17,20 +17,26 @@ They are downloaded automatically on first use for the chosen language.
 
 Usage:
     cat my_wordlist.txt | python wordlist-oracle.py [--language LANG] [--fraction N] [--nonce STRING]
+    cat my_wordlist.txt | python wordlist-oracle.py --filter-fraction [--fraction N] [--nonce STRING]
 
 Options:
-    --language LANG Language dictionary to use (default: deutsch). See supported list below.
-    --fraction N     Include only 1/N of words (by hash). Default: 1 (all words).
-                     Applied identically to both the reference and candidate list,
-                     so relative scores remain valid for smaller test runs.
-    --nonce STRING   Salt for the hash used in fraction sampling. Default: "".
+    --language LANG   Language dictionary to use (default: deutsch). See supported list below.
+    --fraction N      Include only 1/N of words (by hash). Default: 1 (all words).
+                      Applied identically to both the reference and candidate list,
+                      so relative scores remain valid for smaller test runs.
+    --nonce STRING    Salt for the hash used in fraction sampling. Default: "".
+    --filter-fraction Run as a filter only: read words from stdin, apply the same
+                      fraction/nonce logic, and print kept words to stdout (one per line).
+                      No dictionary is loaded; use this to build a fractional test set
+                      compatible with the oracle without reimplementing the sampling logic.
 
 Supported languages (use as --language value):
     brazilian, catalan, deutsch, english, english_phonetic, espanol, francais,
     greek, hebrew, hollands, hungarian, irish, italiano, latin, persian, polish,
     portuguese, romana, russian, scottishgaelic, slovak, suomi, svenska, tamil, turkish
 
-Output: JSON to stdout. Progress and errors go to stderr.
+Output: In normal mode, JSON to stdout. With --filter-fraction, one word per line to stdout.
+Progress and errors go to stderr.
 """
 
 import sys
@@ -147,7 +153,18 @@ def main():
                         help='Include 1/N of words by hash (default: 1 = all)')
     parser.add_argument('--nonce', type=str, default='',
                         help='Salt for hash-based sampling (default: empty string)')
+    parser.add_argument('--filter-fraction', action='store_true',
+                        help='Filter stdin by fraction/nonce and print kept words to stdout')
     args = parser.parse_args()
+
+    if args.filter_fraction:
+        for line in sys.stdin:
+            word = line.strip().upper()
+            if not word or not (2 <= len(word) <= 9):
+                continue
+            if should_include(word, args.nonce, args.fraction):
+                print(word)
+        return
 
     if args.language not in SUPPORTED_LANGUAGES:
         print(f"ERROR: Unsupported language '{args.language}'. Choose from: {', '.join(SUPPORTED_LANGUAGES)}", file=sys.stderr)
@@ -182,7 +199,7 @@ def main():
         "precision_pct": round(tp / len(candidate) * 100, 4) if candidate else 0.0,
     }
 
-    print(json.dumps(result, indent=2))
+    print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
 if __name__ == '__main__':
